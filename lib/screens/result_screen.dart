@@ -7,10 +7,49 @@ import 'package:flutter/material.dart';
 
 import '../values/strings.dart';
 
-class ResultScreen extends StatelessWidget {
+class ResultScreen extends StatefulWidget {
   const ResultScreen({super.key, required this.calculator});
 
   final Calculator calculator;
+
+  @override
+  State<ResultScreen> createState() => _ResultScreenState();
+}
+
+class _ResultScreenState extends State<ResultScreen>
+    with TickerProviderStateMixin {
+  late AnimationController wholePartController;
+  late AnimationController fractionPartController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    wholePartController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: animationDuration),
+      upperBound: widget.calculator.getWholePart().toDouble(),
+    );
+
+    fractionPartController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: animationDuration),
+      upperBound: widget.calculator.getFractionPart().toDouble(),
+    );
+
+    wholePartController.forward();
+    fractionPartController.forward();
+
+    wholePartController.addListener(() => setState(() {}));
+    fractionPartController.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    wholePartController.dispose();
+    fractionPartController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,10 +77,10 @@ class ResultScreen extends StatelessWidget {
                     textBaseline: TextBaseline.alphabetic,
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     children: [
-                      Text(calculator.getWholePart().toString(),
+                      Text('${wholePartController.value.toInt()}',
                           style: kResultScreenCardValueTextStyle),
                       Text(
-                        '.${calculator.getFractionPart()}',
+                        '.${fractionPartController.value.toInt()}',
                         style: kResultScreenFractionValueTextStyle,
                       )
                     ],
@@ -51,13 +90,13 @@ class ResultScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         Text(
-                          calculator.getResultText(),
+                          widget.calculator.getResultText(),
                           textAlign: TextAlign.center,
                           style: kResultTextStyle,
                         ),
                         SizedBox(height: 18.0),
                         Text(
-                          calculator.getResultDescription(),
+                          widget.calculator.getResultDescription(),
                           textAlign: TextAlign.center,
                           style: kResultDescriptionTextStyle,
                         ),
